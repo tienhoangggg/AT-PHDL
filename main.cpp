@@ -1,8 +1,5 @@
-#include <iostream>
-#include <memory.h>
-#include <string.h>
-#include "sha256.cpp"
-#include "aes.cpp"
+#include "program.h"
+
 BYTE* sha256_test(BYTE* text, int length)
 {
 	BYTE* buf = new BYTE[SHA256_BLOCK_SIZE];
@@ -13,35 +10,64 @@ BYTE* sha256_test(BYTE* text, int length)
 	return buf;
 }
 
+void obfuscated(const char* fileName) {
+      // Open the file
+      ifstream inputFile(fileName);
+      if (!inputFile.is_open()) {
+            cout << "Error opening file: " << fileName << endl;
+            return;
+      }
+
+      // Read the content of the file
+      string content((istreambuf_iterator<char>(inputFile)),
+                        istreambuf_iterator<char>());
+
+      // Obfuscate the content by shifting each character
+      for (char& c : content) {
+            c += 1;
+      }
+
+      // Print the obfuscated content
+      cout << "Obfuscated Content:\n" << content << endl;
+}
+
 void encrypt()
 {
 	printf("file's name: ");
-	std::string filename;
-	std::cin >> filename;
+	string filename;
+	cin >> filename;
+
 	printf("password: ");
-	std::string password;
-	std::cin >> password;
+	string password;
+	cin >> password;
+
 	printf("repassword: ");
-	std::string repassword;
-	std::cin >> repassword;
+	string repassword;
+	cin >> repassword;
+
 	if (password != repassword) {
 		printf("password not match\n");
 		return;
 	}
+
 	WORD key_schedule[60];
 	BYTE* key = sha256_test((BYTE*)password.c_str(), password.length());
 	BYTE iv[16] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
 	FILE* fp = fopen(filename.c_str(), "rb");
-	if (fp == NULL) {
+	
+	if (fp == NULL) 
+	{
 		printf("file open error\n");
 		return;
 	}
+
 	fseek(fp, 0, SEEK_END);
 	int size = ftell(fp);
 	fseek(fp, 0, SEEK_SET);
 	BYTE* buf = new BYTE[size];
 	fread(buf, 1, size, fp);
 	fclose(fp);
+
 	int randPadding = (rand()%100) * 32 + 1 + (32 - size%32 - 1);
 	int paddingSize = randPadding + size;
 	BYTE* padding = new BYTE[paddingSize];
@@ -55,11 +81,13 @@ void encrypt()
 	for (int i = 0; i < size; i++) {
 		padding[i + randPadding] = buf[i];
 	}
+
 	delete[] buf;
 	buf = new BYTE[paddingSize];
 	aes_key_setup(key, key_schedule, 256);
 	aes_encrypt_cbc(padding, paddingSize, buf, key_schedule, 256, iv);
 	delete[] padding;
+
 	fp = fopen((filename + ".enc").c_str(), "wb");
 	fwrite(buf, 1, paddingSize, fp);
 	fclose(fp);
@@ -70,11 +98,13 @@ void encrypt()
 void decrypt()
 {
 	printf("file's name: ");
-	std::string filename;
-	std::cin >> filename;
+	string filename;
+	cin >> filename;
+
 	printf("password: ");
-	std::string password;
-	std::cin >> password;
+	string password;
+	cin >> password;
+      
 	WORD key_schedule[60];
 	BYTE* key = sha256_test((BYTE*)password.c_str(), password.length());
 	BYTE iv[16] = {0x00,0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0a,0x0b,0x0c,0x0d,0x0e,0x0f};
@@ -105,7 +135,17 @@ void decrypt()
 		buf[i - paddingSize] = padding[i];
 	}
 	delete[] padding;
-	fp = fopen((filename + ".dec").c_str(), "wb");
+
+	size_t pos = filename.find(".enc");
+	if (pos == string::npos || pos != filename.length() - 4) {
+		printf("Invalid file format\n");
+		return;
+	}
+
+	// Modify the filename to ".dec" extension
+	filename.replace(pos, 4, ".dec");
+	fp = fopen((filename).c_str(), "wb");
+
 	fwrite(buf, 1, size - paddingSize, fp);
 	fclose(fp);
 	delete[] buf;
@@ -120,8 +160,10 @@ int main()
 		printf("2. decrypt\n");
 		printf("3. exit\n");
 		printf("select: ");
+
 		int select;
-		std::cin >> select;
+		cin >> select;
+
 		switch (select) {
 			case 1:
 				encrypt();

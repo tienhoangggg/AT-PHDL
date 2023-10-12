@@ -18,7 +18,7 @@
 /*************************** HEADER FILES ***************************/
 #include <stdlib.h>
 #include <memory.h>
-#include "aes.hpp"
+#include "aes.h"
 
 #include <stdio.h>
 
@@ -1066,29 +1066,3 @@ void aes_decrypt(const BYTE in[], BYTE out[], const WORD key[], int keysize)
 	out[14] = state[2][3];
 	out[15] = state[3][3];
 }
-
-/*******************
-** AES DEBUGGING FUNCTIONS
-*******************/
-/*
-// This prints the "state" grid as a linear hex string.
-void print_state(BYTE state[][4])
-{
-	int idx,idx2;
-
-	for (idx=0; idx < 4; idx++)
-		for (idx2=0; idx2 < 4; idx2++)
-			printf("%02x",state[idx2][idx]);
-	printf("\n");
-}
-
-// This prints the key (4 consecutive ints) used for a given round as a linear hex string.
-void print_rnd_key(WORD key[])
-{
-	int idx;
-
-	for (idx=0; idx < 4; idx++)
-		printf("%08x",key[idx]);
-	printf("\n");
-}
-*/
