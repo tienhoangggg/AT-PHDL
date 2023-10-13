@@ -208,26 +208,24 @@ public:
       {
             this->readDynamicPassFromFile("dyP.txt");
       }
-};
 
-void resetPassword(DynamicPassword dp)
-{
-      cout << "Enter the current dynamic password: ";
-      string currentPassword;
-      cin >> currentPassword;
-
-      if (dp.validDynamicPassword(currentPassword))
+      void resetDynamicPassword()
       {
-            cout << "Enter the new dynamic password: ";
-            string newPassword;
-            cin >> newPassword;
+            cout << "Enter the current dynamic password: ";
+            string currentPassword;
+            cin >> currentPassword;
 
-            dp = DynamicPassword(newPassword);
-            dp.writeToFile("dyP.txt");
+            if (this->validDynamicPassword(currentPassword))
+            {
+                  cout << "Enter the new dynamic password: ";
+                  string newPassword;
+                  cin >> newPassword;
+
+                  this->storedPassword = newPassword;
+                  this->writeToFile("dyP.txt");
+            }
       }
-}
-
-
+};
 
 int main()
 {     
@@ -265,7 +263,7 @@ int main()
 				decrypt();
 				break;
                   case 3:
-                        resetPassword(dp);
+                        dp.resetDynamicPassword();
                         return 0;
                   
 			case 10:

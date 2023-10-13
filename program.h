@@ -14,24 +14,3 @@ void encrypt();
 void decrypt();
 
 #endif // PROGRAM_H
-
-// void obfuscated(const char* fileName) {
-//       // Open the file
-//       ifstream inputFile(fileName);
-//       if (!inputFile.is_open()) {
-//             cout << "Error opening file: " << fileName << endl;
-//             return;
-//       }
-
-//       // Read the content of the file
-//       string content((istreambuf_iterator<char>(inputFile)),
-//                         istreambuf_iterator<char>());
-
-//       // Obfuscate the content by shifting each character
-//       for (char& c : content) {
-//             c += 1;
-//       }
-
-//       // Print the obfuscated content
-//       cout << "Obfuscated Content:\n" << content << endl;
-// }
