@@ -10,27 +10,6 @@ BYTE* sha256_test(BYTE* text, int length)
 	return buf;
 }
 
-void obfuscated(const char* fileName) {
-      // Open the file
-      ifstream inputFile(fileName);
-      if (!inputFile.is_open()) {
-            cout << "Error opening file: " << fileName << endl;
-            return;
-      }
-
-      // Read the content of the file
-      string content((istreambuf_iterator<char>(inputFile)),
-                        istreambuf_iterator<char>());
-
-      // Obfuscate the content by shifting each character
-      for (char& c : content) {
-            c += 1;
-      }
-
-      // Print the obfuscated content
-      cout << "Obfuscated Content:\n" << content << endl;
-}
-
 void encrypt()
 {
 	printf("file's name: ");
@@ -152,8 +131,41 @@ void decrypt()
 	printf("decrypt success\n");
 }
 
-int main()
+string hashPassword(const string& password)
 {
+      BYTE* myByte = (BYTE*)password.c_str();
+      string hashedPassword((char*)sha256_test(myByte, password.length()));
+
+      return hashedPassword;
+}
+
+bool validDynamicPassword()
+{
+      string storedPassword = hashPassword("123456");
+
+      cout << "Enter the dynamic password: ";
+      string enteredPassword;
+      cin >> enteredPassword;
+
+      // Băm mật khẩu nhập vào và so sánh với mật khẩu được lưu trữ
+      string hashedEnteredPassword = hashPassword(enteredPassword);
+
+      if (hashedEnteredPassword == storedPassword) {
+            cout << "Password is correct. Continue running the program." << endl;
+            // Đây là nơi để tiếp tục thực hiện mã của bạn
+            return true;
+      } else {
+            cout << "Incorrect password. Program terminated." << endl;
+            return false;
+      }
+}
+
+int main()
+{     while (!validDynamicPassword())
+      {
+            cout << "Please re-enter password..." << endl;
+      }
+
 	srand(time(NULL));
 	while (true) {
 		printf("1. encrypt\n");
