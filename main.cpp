@@ -232,15 +232,15 @@ int main()
       DynamicPassword dp;
       dp.loadingDynamicPass();
 
-      dp.displayPassword();
-
-      cout << "Enter the dynamic password: ";
       string enteredPassword;
+      cout << "Enter the dynamic password: ";
       cin >> enteredPassword;
 
       while (!dp.validDynamicPassword(enteredPassword))
       {
             cout << "Please re-enter password..." << endl;
+            cout << "Enter the dynamic password again: ";
+            cin >> enteredPassword;
       }
 
 	srand(time(NULL));
