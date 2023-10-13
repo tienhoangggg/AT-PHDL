@@ -7,7 +7,6 @@
 #include "sha256/sha256.cpp"
 #include "aes/aes.cpp"
 #include <fstream>
-
 using namespace std;
 
 BYTE* sha256_test(BYTE* text, int length);
