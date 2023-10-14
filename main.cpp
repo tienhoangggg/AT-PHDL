@@ -145,16 +145,10 @@ private:
     
 public:
       // Constructor:
-      DynamicPassword() {
-           //this->storedPassword = hashPassword("123456");
-      }
+      DynamicPassword() { this->storedPassword = ""; }
 
       DynamicPassword(const string& enteredPassword) {
            this->storedPassword = (enteredPassword);
-      }
-
-      void displayPassword() const {
-            std::cout << "Your dy password: " << storedPassword << std::endl;
       }
 
       bool validDynamicPassword(string enteredPassword) const
@@ -172,6 +166,19 @@ public:
             }
       }
 
+      bool isFileEmpty(const string& filename) {
+            ifstream file(filename);
+
+            // Kiểm tra xem tệp có mở thành công không
+            if (!file.is_open()) {
+                  cout << "Cannot open file: " << filename << endl;
+                  return false;
+            }
+
+            // Kiểm tra xem tệp có rỗng không
+            return file.peek() == ifstream::traits_type::eof();
+      }
+
       string readDynamicPassFromFile(const string& filename) {
             ifstream file(filename);
             string content;
@@ -181,6 +188,10 @@ public:
                   content.assign((istreambuf_iterator<char>(file)),
                                     (istreambuf_iterator<char>()));
 
+                  if (content == "")
+                  {
+
+                  }
                   this->storedPassword = hashPassword(content);
 
                   
@@ -204,6 +215,18 @@ public:
             }
       }
 
+      void writeToFile(const string& filename, string content) {
+            ofstream file(filename);
+
+            if (file.is_open()) {
+                  // Ghi nội dung đã chỉnh sửa vào tệp
+                  file << content;
+                  file.close();
+            } else {
+                  cout << "Could not open file for writing: " << filename << endl;
+            }
+      }
+
       void loadingDynamicPass() 
       {
             this->readDynamicPassFromFile("dyP.txt");
@@ -211,36 +234,66 @@ public:
 
       void resetDynamicPassword()
       {
-            cout << "Enter the current dynamic password: ";
             string currentPassword;
+            cout << "Enter the current dynamic password: ";    
             cin >> currentPassword;
 
-            if (this->validDynamicPassword(currentPassword))
+            while (true) 
             {
-                  cout << "Enter the new dynamic password: ";
-                  string newPassword;
-                  cin >> newPassword;
+                  if (this->validDynamicPassword(currentPassword))
+                  {
+                        string newPassword;
+                        cout << "Enter the new dynamic password: ";
+                        cin >> newPassword;
 
-                  this->storedPassword = newPassword;
-                  this->writeToFile("dyP.txt");
+                        string reNewPassword;
+                        cout << "Re-enter the new dynamic password: ";
+                        cin >> reNewPassword;
+
+                        if (newPassword != reNewPassword)
+                        {
+                              cout << "password not match\n";
+                              cout << "Re-enter the new dynamic password again: ";
+                              cin >> reNewPassword;
+                        }
+
+                        this->storedPassword = newPassword;
+                        this->writeToFile("dyP.txt");
+
+                        cout << "Reset password successfully!\n";
+                        return;
+                  } else {
+                        cout << "Please enter the current dynamic password again: ";    
+                        cin >> currentPassword;
+                  }
             }
       }
 };
 
 int main()
-{     
-      DynamicPassword dp;
-      dp.loadingDynamicPass();
-
+{
+      DynamicPassword dynamicPassword;
+      string dyPFile = "dyP.txt";
       string enteredPassword;
-      cout << "Enter the dynamic password: ";
-      cin >> enteredPassword;
 
-      while (!dp.validDynamicPassword(enteredPassword))
-      {
-            cout << "Please re-enter password..." << endl;
-            cout << "Enter the dynamic password again: ";
+      if (dynamicPassword.isFileEmpty(dyPFile)) 
+      {           
+            cout << "Register the dynamic password: ";
             cin >> enteredPassword;
+
+            dynamicPassword.writeToFile(dyPFile, enteredPassword);       
+      } else {
+            dynamicPassword.loadingDynamicPass();
+
+            cout << "Enter the dynamic password: ";
+            cin >> enteredPassword;
+
+            while (!dynamicPassword.validDynamicPassword(enteredPassword))
+            {
+                  cout << "Please re-enter password..." << endl;
+                  cout << "Enter the dynamic password again: ";
+                  cin >> enteredPassword;
+            }
       }
 
 	srand(time(NULL));
@@ -263,7 +316,7 @@ int main()
 				decrypt();
 				break;
                   case 3:
-                        dp.resetDynamicPassword();
+                        dynamicPassword.resetDynamicPassword();
                         return 0;
                   
 			case 10:
