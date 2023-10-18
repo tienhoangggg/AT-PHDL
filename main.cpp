@@ -229,7 +229,7 @@ public:
 
       void loadingDynamicPass() 
       {
-            this->readDynamicPassFromFile("dyP.txt");
+            this->readDynamicPassFromFile("text/dyP.txt");
       }
 
       void resetDynamicPassword()
@@ -258,7 +258,7 @@ public:
                         }
 
                         this->storedPassword = newPassword;
-                        this->writeToFile("dyP.txt");
+                        this->writeToFile("text/dyP.txt");
 
                         cout << "Reset password successfully!\n";
                         return;
@@ -273,7 +273,7 @@ public:
 int main()
 {
       DynamicPassword dynamicPassword;
-      string dyPFile = "dyP.txt";
+      string dyPFile = "text/dyP.txt";
       string enteredPassword;
 
       if (dynamicPassword.isFileEmpty(dyPFile)) 
