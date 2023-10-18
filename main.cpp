@@ -10,25 +10,12 @@ BYTE* sha256_test(BYTE* text, int length)
 	return buf;
 }
 
-void obfuscated(const char* fileName) {
-      // Open the file
-      ifstream inputFile(fileName);
-      if (!inputFile.is_open()) {
-            cout << "Error opening file: " << fileName << endl;
-            return;
-      }
+string hashPassword(const string& password)
+{
+      BYTE* myByte = (BYTE*)password.c_str();
+      string hashedPassword((char*)sha256_test(myByte, password.length()));
 
-      // Read the content of the file
-      string content((istreambuf_iterator<char>(inputFile)),
-                        istreambuf_iterator<char>());
-
-      // Obfuscate the content by shifting each character
-      for (char& c : content) {
-            c += 1;
-      }
-
-      // Print the obfuscated content
-      cout << "Obfuscated Content:\n" << content << endl;
+      return hashedPassword;
 }
 
 void encrypt()
@@ -152,13 +139,170 @@ void decrypt()
 	printf("decrypt success\n");
 }
 
+class DynamicPassword {
+private:
+      string storedPassword;
+    
+public:
+      // Constructor:
+      DynamicPassword() { this->storedPassword = ""; }
+
+      DynamicPassword(const string& enteredPassword) {
+           this->storedPassword = (enteredPassword);
+      }
+
+      bool validDynamicPassword(string enteredPassword) const
+      {
+            // Băm mật khẩu nhập vào và so sánh với mật khẩu được lưu trữ
+            string hashedEnteredPassword = hashPassword(enteredPassword);
+
+            if (hashedEnteredPassword == storedPassword) {
+                  cout << "Password is correct. Continue running the program." << endl;
+                  // Đây là nơi để tiếp tục thực hiện mã của bạn
+                  return true;
+            } else {
+                  cout << "Incorrect password. Program terminated." << endl;
+                  return false;
+            }
+      }
+
+      bool isFileEmpty(const string& filename) {
+            ifstream file(filename);
+
+            // Kiểm tra xem tệp có mở thành công không
+            if (!file.is_open()) {
+                  cout << "Cannot open file: " << filename << endl;
+                  return false;
+            }
+
+            // Kiểm tra xem tệp có rỗng không
+            return file.peek() == ifstream::traits_type::eof();
+      }
+
+      string readDynamicPassFromFile(const string& filename) {
+            ifstream file(filename);
+            string content;
+            
+            if (file.is_open()) {
+                  // Đọc nội dung từ tệp vào chuỗi content
+                  content.assign((istreambuf_iterator<char>(file)),
+                                    (istreambuf_iterator<char>()));
+
+                  if (content == "")
+                  {
+
+                  }
+                  this->storedPassword = hashPassword(content);
+
+                  
+                  file.close();
+            } else {
+                  cout << "Could not open file: " << filename << endl;
+            }
+
+            return content;
+      }
+
+      void writeToFile(const string& filename) {
+            ofstream file(filename);
+
+            if (file.is_open()) {
+                  // Ghi nội dung đã chỉnh sửa vào tệp
+                  file << this->storedPassword;
+                  file.close();
+            } else {
+                  cout << "Could not open file for writing: " << filename << endl;
+            }
+      }
+
+      void writeToFile(const string& filename, string content) {
+            ofstream file(filename);
+
+            if (file.is_open()) {
+                  // Ghi nội dung đã chỉnh sửa vào tệp
+                  file << content;
+                  file.close();
+            } else {
+                  cout << "Could not open file for writing: " << filename << endl;
+            }
+      }
+
+      void loadingDynamicPass() 
+      {
+            this->readDynamicPassFromFile("dyP.txt");
+      }
+
+      void resetDynamicPassword()
+      {
+            string currentPassword;
+            cout << "Enter the current dynamic password: ";    
+            cin >> currentPassword;
+
+            while (true) 
+            {
+                  if (this->validDynamicPassword(currentPassword))
+                  {
+                        string newPassword;
+                        cout << "Enter the new dynamic password: ";
+                        cin >> newPassword;
+
+                        string reNewPassword;
+                        cout << "Re-enter the new dynamic password: ";
+                        cin >> reNewPassword;
+
+                        if (newPassword != reNewPassword)
+                        {
+                              cout << "password not match\n";
+                              cout << "Re-enter the new dynamic password again: ";
+                              cin >> reNewPassword;
+                        }
+
+                        this->storedPassword = newPassword;
+                        this->writeToFile("dyP.txt");
+
+                        cout << "Reset password successfully!\n";
+                        return;
+                  } else {
+                        cout << "Please enter the current dynamic password again: ";    
+                        cin >> currentPassword;
+                  }
+            }
+      }
+};
+
 int main()
 {
+      DynamicPassword dynamicPassword;
+      string dyPFile = "dyP.txt";
+      string enteredPassword;
+
+      if (dynamicPassword.isFileEmpty(dyPFile)) 
+      {           
+            cout << "Register the dynamic password: ";
+            cin >> enteredPassword;
+
+            dynamicPassword.writeToFile(dyPFile, enteredPassword);       
+      } else {
+            dynamicPassword.loadingDynamicPass();
+
+            cout << "Enter the dynamic password: ";
+            cin >> enteredPassword;
+
+            while (!dynamicPassword.validDynamicPassword(enteredPassword))
+            {
+                  cout << "Please re-enter password..." << endl;
+                  cout << "Enter the dynamic password again: ";
+                  cin >> enteredPassword;
+            }
+      }
+
 	srand(time(NULL));
 	while (true) {
 		printf("1. encrypt\n");
 		printf("2. decrypt\n");
-		printf("3. exit\n");
+            printf("3. reset dynamic password\n");
+
+		printf("10. exit\n");
 		printf("select: ");
 
 		int select;
@@ -171,7 +315,11 @@ int main()
 			case 2:
 				decrypt();
 				break;
-			case 3:
+                  case 3:
+                        dynamicPassword.resetDynamicPassword();
+                        return 0;
+                  
+			case 10:
 				return 0;
 			default:
 				printf("select error\n");
